@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { assets } from "../assets/assets";
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import axios from 'axios';
 
 const HospitalsInfo = () => {
   const { id } = useParams();
@@ -14,6 +16,43 @@ const HospitalsInfo = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [hosInfo, setHosInfo] = useState(null); // Initialize as null
   const [loading, setLoading] = useState(true);
+  // google maps 
+  const [healthCenters, setHealthCenters] = useState([]);
+    const [location, setLocation] = useState({ lat: 0, lng: 0 });
+    const [error, setError] = useState(null);
+
+    const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with your Google Maps API key
+
+    useEffect(() => {
+        // Get user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocation({ lat: latitude, lng: longitude });
+                    fetchHealthCenters(latitude, longitude);
+                },
+                (err) => {
+                    setError(err.message);
+                }
+            );
+        } else {
+            setError('Geolocation is not supported by this browser.');
+        }
+    }, []);
+
+    const fetchHealthCenters = async (latitude, longitude) => {
+        const radius = 5000; // 5 km radius
+        const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=${radius}&type=health&key=${apiKey}`;
+
+        try {
+            const response = await axios.get(url);
+            setHealthCenters(response.data.results);
+        } catch (error) {
+            console.error('Error fetching health centers:', error);
+            setError('Failed to fetch health centers.');
+        }
+    };
 
   // Fetch hospital info based on the ID
   useEffect(() => {
@@ -71,10 +110,10 @@ const HospitalsInfo = () => {
     doctors1 && (
       <div>
         {/*-----------  doctors details  ------------------*/}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <div>
             <img
-              className="bg-primary w-full sm:max-w-72 rounded-lg"
+              className="w-full rounded-lg bg-primary sm:max-w-72"
               src={hosInfo[0].image}
               alt=""
             />
@@ -90,11 +129,11 @@ const HospitalsInfo = () => {
                       {item.name}
                       <img className="w-5" src={assets.verified_icon} alt="" />
                     </p>
-                    <p className="text-xl mt-1 font-medium text-zinc-700">
+                    <p className="mt-1 text-xl font-medium text-zinc-700">
                       Email Address
                     </p>
                     <p>{item.email_address}</p>
-                    <p className="text-xl mt-1 font-medium text-zinc-700">
+                    <p className="mt-1 text-xl font-medium text-zinc-700">
                       Address
                     </p>
                     <div>
@@ -104,11 +143,11 @@ const HospitalsInfo = () => {
                       <p>Street: {item.address.street}</p>
                     </div>
                     <p className="mt-1 text-xs">
-                      <span className="text-xl text-neutral-700 font-bold">
+                      <span className="text-xl font-bold text-neutral-700">
                         Phone & Emergency Department
                       </span>
                     </p>
-                    <p className="text-xs text-green-700 font-semibold">
+                    <p className="text-xs font-semibold text-green-700">
                       <img
                         className="w-4 h-4"
                         src={assets.phonecall_icon}
@@ -116,7 +155,7 @@ const HospitalsInfo = () => {
                       />{" "}
                       Phone {hosInfo[0].phone_number}
                     </p>
-                    <p className="text-xs text-red-600 font-semibold">
+                    <p className="text-xs font-semibold text-red-600">
                       <img
                         className="w-4 h-4"
                         src={assets.phonecall_icon}
@@ -132,16 +171,16 @@ const HospitalsInfo = () => {
           <div className="flex justify-end">
             <div className="flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-5px] sm:mt-0 text-xl font-bold">
               <p>Physical Address: </p>
-              <p className="text-sm font-medium mt-2">
+              <p className="mt-2 text-sm font-medium">
                 {hosInfo[0].physical_address.full_address}
               </p>
-              <p className="flex items-center gap-1 text-xl font-bold text-gray-900 mt-2">
+              <p className="flex items-center gap-1 mt-2 text-xl font-bold text-gray-900">
                 About: <img src={assets.info_icon} alt="" />
               </p>
-              <p className="text-sm font-medium mt-2">{hosInfo[0].about}</p>
+              <p className="mt-2 text-sm font-medium">{hosInfo[0].about}</p>
               <div>
                 {" "}
-                <button className="py-2 mt-2 text-xl text-center transition-all duration-300 border text-blue-500 sm:min-w-48 hover:bg-primary hover:text-white">
+                <button className="py-2 mt-2 text-xl text-center text-blue-500 transition-all duration-300 border sm:min-w-48 hover:bg-primary hover:text-white">
                   <a
                     href={googleMapsLink}
                     target="_blank"
@@ -159,7 +198,7 @@ const HospitalsInfo = () => {
         {/* ------------------  hospitals ? doctors ------------------------- */}
         <div>
           <p className="text-gray-600">Browse through the doctors speciality</p>
-          <div className="flex flex-col sm:flex-row items-start gap-5 mt-5">
+          <div className="flex flex-col items-start gap-5 mt-5 sm:flex-row">
             <button
               className={`py-1 px-3 border rounded text-sm transition-all sm:hidden ${showFilter ? "bg-primary text-white" : ""}`}
               onClick={() => setShowFilter((prev) => !prev)}
@@ -230,7 +269,7 @@ const HospitalsInfo = () => {
                 Gastroenterologist
               </p>
             </div>
-            <div className="w-full grid grid-cols-auto gap-4 gap-y-6">
+            <div className="grid w-full gap-4 grid-cols-auto gap-y-6">
               {filterDoc.map((item, index) => (
                 <div
                   onClick={() => navigate(`/appointment/${item.doctor_id}`)}
@@ -247,15 +286,48 @@ const HospitalsInfo = () => {
                       ></p>
                       <p>{item.availability ? "Available" : "Not Available"}</p>
                     </div>
-                    <p className="text-gray-900 text-lg font-medium">
+                    <p className="text-lg font-medium text-gray-900">
                       {item.name}
                     </p>
-                    <p className="text-gray-600 text-sm">{item.speciality}</p>
+                    <p className="text-sm text-gray-600">{item.speciality}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+        {/* ---------------------- googgle map API ------------------------------ */}
+        <div>
+            <h1>Health Center Locator</h1>
+            {error && <p>Error: {error}</p>}
+            <LoadScript googleMapsApiKey={apiKey}>
+                <GoogleMap
+                    mapContainerStyle={{ height: '400px', width: '100%' }}
+                    center={location}
+                    zoom={14}
+                >
+                    {healthCenters.map((center) => (
+                        <Marker
+                            key={center.place_id}
+                            position={{
+                                lat: center.geometry.location.lat(),
+                                lng: center.geometry.location.lng(),
+                            }}
+                            title={center.name}
+                        />
+                    ))}
+                </GoogleMap>
+            </LoadScript>
+            <h2>Nearby Health Centers:</h2>
+            <ul>
+                {healthCenters.map((center) => (
+                    <li key={center.place_id}>
+                        <strong>{center.name}</strong><br />
+                        {center.vicinity}<br />
+                        Rating: {center.rating ? center.rating : 'N/A'}
+                    </li>
+                ))}
+            </ul>
         </div>
       </div>
     )
