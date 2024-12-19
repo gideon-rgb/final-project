@@ -16,6 +16,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { AppContext } from "./context/AppContext";
+import HospitalsInfo from "./pages/HospitalsInfo";
+import Hospitals from "./pages/AllHospitals";
 
 const App = () => {
   const { clientId } = useContext(AppContext);
@@ -36,6 +38,12 @@ const App = () => {
           <Route path="/my-appointments" element={<MyAppointments />} />
           <Route path="/appointment/:docId" element={<Appointment />} />
           <Route path="/payment/:appointmentId" element={<PayMent />} />
+          <Route path="/hospitals/:id" element={<HospitalsInfo />} />
+          <Route
+            path="/hospitals/:id/:speciality"
+            element={<HospitalsInfo />}
+          />
+          <Route path="/hospitals" element={<Hospitals />} />
         </Routes>
         <Footer />
       </div>

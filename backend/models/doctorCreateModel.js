@@ -20,7 +20,8 @@ async function createDoctorsTable() {
                 fees DECIMAL(10, 2) NOT NULL,
                 address JSON NOT NULL,
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                slots_booked JSON 
+                slots_booked JSON,
+                hospital TEXT NOT NULL
             );
         `;
 

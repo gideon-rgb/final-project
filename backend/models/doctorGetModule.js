@@ -3,7 +3,7 @@ import connectToDatabase from '../config/db.js';
 const getDoctors = async () => {
     const connection = await connectToDatabase();
     const selectQuery = `
-        SELECT doctor_id, name, email, image, speciality, degree, experience, about, availability, fees, address, date
+        SELECT doctor_id, name, email, image, speciality, degree, experience, about, availability, fees, address, date, hospital
         FROM doctors
     `;
 

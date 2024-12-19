@@ -3,7 +3,7 @@ import moment from 'moment'
 
 const insertDoctor = async (doctorData) => {
     // Validate input
-    const requiredFields = ['name', 'email', 'image', 'password', 'speciality', 'degree', 'experience', 'about', 'fees', 'date'];
+    const requiredFields = ['name', 'email', 'image', 'password', 'speciality', 'degree', 'experience', 'about', 'fees', 'date','hospital'];
     for (const field of requiredFields) {
         if (!doctorData[field]) {
             throw new Error(`Missing required field: ${field}`);
@@ -12,8 +12,8 @@ const insertDoctor = async (doctorData) => {
 
     const connection = await connectToDatabase();
     const insertQuery = `
-        INSERT INTO doctors (name, email, image, password, speciality, degree, experience, about, availability, fees, address, date, slots_booked)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO doctors (name, email, image, password, speciality, degree, experience, about, availability, fees, address, date, slots_booked, hospital)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     // Define the default slots booked
@@ -48,7 +48,8 @@ const insertDoctor = async (doctorData) => {
             doctorData.fees,
             JSON.stringify(doctorData.address),
             doctorData.date,
-            defaultSlotsBooked // Use the default slots booked here
+            defaultSlotsBooked, // Use the default slots booked here
+            doctorData.hospital
         ]);
 
         // Check if the insert was successful and return the inserted record

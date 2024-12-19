@@ -40,7 +40,7 @@ const doctorsList = async (req, res) => {
     try {
         // SQL query to select doctors excluding password and email
         const [doctors] = await connection.execute(`
-            SELECT doctor_id, name, image, speciality, degree, experience, about, availability, fees, address, date, slots_booked
+            SELECT doctor_id, name, image, speciality, degree, experience, about, availability, fees, address, date, slots_booked, hospital
             FROM doctors
         `);
 

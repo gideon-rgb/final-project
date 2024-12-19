@@ -18,6 +18,7 @@ const AddDoctor = () => {
     const [degree, setDegree] = useState('')
     const [address1, setAddress1] = useState('')
     const [address2, setAddress2] = useState('')
+    const [hospital, setHospital] = useState('')
 
     const { backendUrl, aToken } = useContext(AdminContex)
 
@@ -39,6 +40,7 @@ const AddDoctor = () => {
             formData.append('about', about)
             formData.append('speciality', Speciality)
             formData.append('degree', degree)
+            formData.append('hospital', hospital)
             formData.append('address', JSON.stringify({ line1: address1, line2: address2 }))
 
             //console.log formdata
@@ -58,6 +60,7 @@ const AddDoctor = () => {
                 setDegree('')
                 setAddress1('')
                 setAddress2('')
+                setHospital('')
             } else {
                 toast.error(data.message)
             }
@@ -133,6 +136,10 @@ const AddDoctor = () => {
                         <div className='flex-1 flex flex-col gap-1'>
                             <p>Education</p>
                             <input onChange={(e) => setDegree(e.target.value)} value={degree} className='border rounded px-3 py-2' type="text" placeholder='Education' required />
+                        </div>
+                        <div className='flex-1 flex flex-col gap-1'>
+                            <p>Hospital</p>
+                            <input onChange={(e) => setHospital(e.target.value)} value={hospital} className='border rounded px-3 py-2' type="text" placeholder='Hospital' required />
                         </div>
                         <div className='flex-1 flex flex-col gap-1'>
                             <p>Address</p>

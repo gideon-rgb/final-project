@@ -6,7 +6,7 @@ export const DoctorContex = createContext()
 
 const DoctorContextProvider = (props) => {
 
-    const backendUrl = "https://mpanel.atoneclinic.co.ke"
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
 
     const [dToken, setDToken] =  useState(localStorage.getItem('dToken')?localStorage.getItem('dToken'):'')
     const [appointments, setAppointments] = useState([])

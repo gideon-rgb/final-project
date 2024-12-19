@@ -11,7 +11,7 @@ const AdminContextProvider = (props) => {
     const [appointments,setAppointments] = useState([])
     const [dashData,setDashData] = useState(false)
 
-    const backendUrl = "https://mpanel.atoneclinic.co.ke"
+    const backendUrl =import.meta.env.VITE_BACKEND_URL
 
     const getAllDoctors = async () => {
 

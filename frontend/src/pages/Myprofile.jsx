@@ -8,7 +8,7 @@ const Myprofile = () => {
   const { userData, setUserData, token, backendUrl, loadUserProfileData } =
     useContext(AppContext);
 
-  console.log("frontend userData:", userData);
+
 
   const [isEdite, setIsEdite] = useState(false);
   const [image, setImage] = useState(false);

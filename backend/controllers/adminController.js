@@ -1,5 +1,7 @@
 import createDoctorsTable from '../models/doctorCreateModel.js'; 
+import createHospitalsTable from '../models/hospitalCreateModel.js';
 import insertDoctor from '../models/doctorInsertModule.js'; 
+import insertHospital from '../models/hospitalInsertModule.js';
 import bcrypt from 'bcrypt'; 
 import cloudinary from 'cloudinary'; 
 import validator from 'validator'; 
@@ -7,17 +9,17 @@ import jwt from 'jsonwebtoken';
 import getDoctors from '../models/doctorGetModule.js';
 import connectToDatabase from '../config/db.js';
 
-
+// API for adding doctors
 const addDoctor = async (req, res) => {
     try {
         // Ensure the doctors table exists
         await createDoctorsTable();
 
-        const { name, email, password, speciality, degree, experience, about, fees, address } = req.body;
+        const { name, email, password, speciality, degree, experience, about, fees, address, hospital } = req.body;
         const imageFile = req.file;
 
         // Check for missing details
-        if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !imageFile ) {
+        if (!name || !email || !password || !speciality || !degree || !experience || !about || !fees || !imageFile || !hospital) {
             return res.json({ success: false, message: "Missing required details" });
         }
 
@@ -55,6 +57,7 @@ const addDoctor = async (req, res) => {
             about,
             fees,
             address,
+            hospital,
             date: Date.now()
         };
         
@@ -72,6 +75,66 @@ const addDoctor = async (req, res) => {
         }
     } catch (error) {
         console.error('Error in addDoctor:', error);
+        return res.json({ success: false, message: "Internal server error" });
+    }
+};
+
+// API for adding hospitals
+const addHospital = async (req, res) => {
+    try {
+        // Ensure the doctors table exists
+        await createHospitalsTable();
+
+        const { name, email_address, phone_number, emergency_number, physical_address, about,  address } = req.body;
+        console.log(name, email_address, phone_number, emergency_number, physical_address, about, address,)
+        const imageFile = req.file;
+
+        //Check for missing details
+        if (!name || !email_address || !about  || !phone_number || !emergency_number || !address || !imageFile || !physical_address) {
+            return res.json({ success: false, message: "Missing required details" });
+        }
+
+        // Validate email format
+        // if (!validator.isEmail(email_address)) {
+        //     return res.json({ success: false, message: "Please enter a valid email" });
+        // }
+
+        // Upload image to Cloudinary
+        let imageUrl = '';
+        if (imageFile) {
+            const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" });
+            imageUrl = imageUpload.secure_url;
+            console.log('imageUrl:', imageUrl);
+        }
+
+
+        const hospitalData = {
+            name,
+            email_address,
+            about,
+            address,
+            phone_number,
+            emergency_number,
+            date: Date.now(),
+            image: imageUrl,
+            physical_address
+        };
+        console.log("hospitalData:",hospitalData)
+        
+
+        // Insert the new hospital
+        const newHospital = await insertHospital(hospitalData);
+
+        console.log('newHospital:', newHospital);
+
+        // Check if newDoctor is defined and send appropriate response
+        if (newHospital) {
+            return res.json({ success: true, message: "Hospital added successfully", hospital: newHospital });
+        } else {
+            return res.json({ success: false, message: "Failed to create Hospital record" });
+        }
+    } catch (error) {
+        console.error('Error in addHospital:', error);
         return res.json({ success: false, message: "Internal server error" });
     }
 };
@@ -221,4 +284,4 @@ const adminDashboard = async (req, res) =>{
 
 }
 
-export { addDoctor, loginAdmin, allDoctors, appointmentAdmin, appointmentCancel, adminDashboard};
+export { addDoctor, loginAdmin, allDoctors, appointmentAdmin, appointmentCancel, adminDashboard, addHospital};

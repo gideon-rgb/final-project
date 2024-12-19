@@ -254,7 +254,7 @@ const bookAppointment = async (req, res) => {
         connection = await connectToDatabase(); // Establish the database connection
 
         // Step 1: Retrieve doctor information
-        const [doctorResults] = await connection.execute('SELECT doctor_id, name, email, speciality, degree, experience, about, availability, slots_booked, fees, date, image, address FROM doctors WHERE doctor_id = ?', [docId]);
+        const [doctorResults] = await connection.execute('SELECT doctor_id, name, email, speciality, degree, experience, about, availability, slots_booked, fees, date, image, address, hospital FROM doctors WHERE doctor_id = ?', [docId]);
 
         if (!doctorResults || doctorResults.length === 0) {
             return res.json({ success: false, message: 'Doctor not found' });
@@ -265,6 +265,7 @@ const bookAppointment = async (req, res) => {
         if (!doctor.availability) {
             return res.json({ success: false, message: 'Doctor not available' });
         }
+        
         
         // Step 2: Initialize slotsBooked
         let slotsBooked = {};
@@ -322,7 +323,8 @@ const bookAppointment = async (req, res) => {
             availability: doctor.availability,
             image: doctor.image,
             date: doctor.date,
-            address: doctor.address
+            address: doctor.address,
+            hospital: doctor.hospital
         });
 
         // Step 5: Prepare appointment data
@@ -336,7 +338,7 @@ const bookAppointment = async (req, res) => {
             slotDate,
             date: new Date(),
         };
-        
+        console.log("all id:",appointmentData.docData)
         
         // Step 6: Insert appointment record
 
@@ -729,7 +731,7 @@ const refundCapturedPayment = async (capturedPaymentId) => {
 // API FOR Updating the payment Status
 
 const updatePaymentStatus = async ( req, res) => {
-  let connection
+  let connection;
   try {
     connection = await connectToDatabase(); // Establish database connection
     const { orderData, appointmentId, status} = req.body
@@ -797,7 +799,33 @@ async function calculateOrderAmount(cart) {
   return cart.reduce((total, item) => total + item.price * item.quantity, 0);
 }
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, updatePaymentStatus, createOrder1, verifyPayPalPayment, refundCapturedPayment };
+// API for getting hospital data
+
+const getHospitalData = async (req, res) => {
+  let connection;
+  try {
+    connection = await connectToDatabase();
+    // get hospital data from the database based on the provided id
+    //const hospitalId = req.params.id;
+    const query = 'SELECT * FROM hospitals';
+    const [hospital] = await connection.query(query);
+
+    if (!hospital) {
+      return res.status(404).json({ success: false, message: 'Hospital not found' });
+    }
+
+    res.json({ success: true, hospital });
+  } catch (error) {
+    console.error('Error getting hospital data:', error);
+    res.status(500).json({ success: false, message: 'An error occurred while getting hospital data' });
+  } finally {
+    if (connection) {
+      await connection.release();
+    }
+  }
+};
+
+export { registerUser, getHospitalData, loginUser, getProfile, updateProfile, bookAppointment, listAppointment, cancelAppointment, updatePaymentStatus, createOrder1, verifyPayPalPayment, refundCapturedPayment };
 
 
   

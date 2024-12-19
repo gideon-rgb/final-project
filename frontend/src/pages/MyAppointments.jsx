@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +15,6 @@ const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData, clientId } =
     useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
-  const [showPayPal, setShowPayPal] = useState(false);
   const [appointmentId, setAppointmentId] = useState(null);
   const months = [
     "",
@@ -34,7 +32,6 @@ const MyAppointments = () => {
     "Dec",
   ];
   const navigate = useNavigate();
-  const [message, setMessage] = useState("");
 
   const slotDateFormat = (slotDate) => {
     const dateArray = slotDate.split("_");
@@ -83,7 +80,7 @@ const MyAppointments = () => {
     if (token) {
       getUserAppointments();
     }
-  }, [token]);
+  }, [token, appointments]);
 
   return (
     <div>
@@ -119,6 +116,12 @@ const MyAppointments = () => {
                     Date & Time:
                   </span>
                   {slotDateFormat(item.slotDate)} | {item.slotTime}
+                </p>
+                <p className="mt-1 text-xs">
+                  <span className="text-sm font-medium text-neutral-700">
+                    Hospital:
+                  </span>
+                  {item.docData.hospital}
                 </p>
               </div>
               <div className="flex flex-col justify-end gap-2 text-white">

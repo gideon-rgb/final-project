@@ -21,6 +21,8 @@ import General_physician from "./General_physician.svg";
 import Gynecologist from "./Gynecologist.svg";
 import Neurologist from "./Neurologist.svg";
 import Pediatricians from "./Pediatricians.svg";
+import phonecall_icon from "./phonecall_icon.png";
+import headarrow_icon from "./headarrow_icon.png";
 
 export const assets = {
   appointment_img,
@@ -40,6 +42,8 @@ export const assets = {
   upload_icon,
   stripe_logo,
   razorpay_logo,
+  phonecall_icon,
+  headarrow_icon,
 };
 
 export const specialityData = [

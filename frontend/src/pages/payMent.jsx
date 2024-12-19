@@ -38,8 +38,7 @@ function PayMent() {
   ];
   const navigate = useNavigate();
 
-  console.log(appointmentInfo, appointmentId, userAppointmentsInfo);
-  console.log(userAppointmentsInfo);
+
 
   const slotDateFormat = (slotDate) => {
     const dateArray = slotDate.split("_");
@@ -54,7 +53,7 @@ function PayMent() {
     components: "buttons",
   };
 
-  console.log(userAppointmentsInfo);
+ 
   const upDateServerDataBase = async (orderData) => {
     try {
       const { data } = await axios.post(
@@ -99,7 +98,7 @@ function PayMent() {
     setUserAppointmentsInfo(userDataInfo);
   };
 
-  console.log(userAppointmentsInfo.amount)
+
 
   useEffect(() => {
     getUserAppointments();
@@ -117,10 +116,10 @@ function PayMent() {
         {userAppointmentsInfo.length === 0 ? (
           <p>No doctor found.</p>
         ) : (
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <div>
               <img
-                className="bg-primary w-full sm:max-w-72 rounded-lg"
+                className="w-full rounded-lg bg-primary sm:max-w-72"
                 src={userAppointmentsInfo.docData.image}
                 alt=""
               />
@@ -132,7 +131,7 @@ function PayMent() {
                 {userAppointmentsInfo.docData.name}
                 <img className="w-5" src={assets.verified_icon} alt="" />
               </p>
-              <div className="flex items-center gap-2 text-sm mt-1 text-gray-600">
+              <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
                 <p>
                   {userAppointmentsInfo.docData.degree} -{" "}
                   {userAppointmentsInfo.docData.speciality}
@@ -144,7 +143,7 @@ function PayMent() {
 
               {/* ------------------- Doctor About -------------------------------------- */}
               <div>
-                <p className="flex items-center gap-1 text-sm font-medium text-gray-900 mt-3">
+                <p className="flex items-center gap-1 mt-3 text-sm font-medium text-gray-900">
                   About <img src={assets.info_icon} alt="" />
                 </p>
                 <p className="text-sm text-gray-500 max-w-[700px] mt-1">
@@ -152,6 +151,12 @@ function PayMent() {
                 </p>
               </div>
               <p className="text-gray-500 font-medium mt-4">
+                Practices at:{" "}
+                <span className="text-gray-600">
+                  {userAppointmentsInfo.docData.hospital}
+                </span>
+              </p>
+              <p className="mt-4 font-medium text-gray-500">
                 Appointment fee:{" "}
                 <span className="text-gray-600">
                   {currencySymbol}
@@ -216,114 +221,113 @@ function PayMent() {
 
         {/*------------------------paypal payment-------------------------------------------*/}
         <div className="paypal-button-container">
-      <PayPalScriptProvider options={initialOptions}>
-        <PayPalButtons
-          style={{
-            shape: "rect",
-            layout: "vertical",
-            color: "gold",
-            label: "paypal",
-          }}
-          createOrder={async () => {
-            try {
-              const response = await fetch("/api/user/orders", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                // use the "body" param to optionally pass additional order information
-                // like product ids and quantities
-                body: JSON.stringify({
-                  cart: [
-                    {
-                      id: appointmentId,
-                      quantity: 1,
-                      cost: userAppointmentsInfo.amount,
+          <PayPalScriptProvider options={initialOptions}>
+            <PayPalButtons
+              style={{
+                shape: "rect",
+                layout: "vertical",
+                color: "gold",
+                label: "paypal",
+              }}
+              createOrder={async () => {
+                try {
+                  const response = await fetch("/api/user/orders", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
                     },
-                  ],
-                }),
-              });
+                    // use the "body" param to optionally pass additional order information
+                    // like product ids and quantities
+                    body: JSON.stringify({
+                      cart: [
+                        {
+                          id: appointmentId,
+                          quantity: 1,
+                          cost: userAppointmentsInfo.amount,
+                        },
+                      ],
+                    }),
+                  });
 
-              const orderData = await response.json();
+                  const orderData = await response.json();
 
-              if (orderData.id) {
-                return orderData.id;
-              } else {
-                const errorDetail = orderData?.details?.[0];
-                const errorMessage = errorDetail
-                  ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
-                  : JSON.stringify(orderData);
+                  if (orderData.id) {
+                    return orderData.id;
+                  } else {
+                    const errorDetail = orderData?.details?.[0];
+                    const errorMessage = errorDetail
+                      ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
+                      : JSON.stringify(orderData);
 
-                throw new Error(errorMessage);
-              }
-            } catch (error) {
-              console.error(error);
-              setMessage(`Could not initiate PayPal Checkout...${error}`);
-            }
-          }}
-          onApprove={async (data, actions) => {
-            try {
-              const response = await fetch(
-                `/api/user/orders/${data.orderID}/capture`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
+                    throw new Error(errorMessage);
+                  }
+                } catch (error) {
+                  console.error(error);
+                  setMessage(`Could not initiate PayPal Checkout...${error}`);
                 }
-              );
+              }}
+              onApprove={async (data, actions) => {
+                try {
+                  const response = await fetch(
+                    `/api/user/orders/${data.orderID}/capture`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                    },
+                  );
 
-              const orderData = await response.json();
-              
-              // Three cases to handle:
-              //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-              //   (2) Other non-recoverable errors -> Show a failure message
-              //   (3) Successful transaction -> Show confirmation or thank you message
+                  const orderData = await response.json();
 
-              const errorDetail = orderData?.details?.[0];
+                  // Three cases to handle:
+                  //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+                  //   (2) Other non-recoverable errors -> Show a failure message
+                  //   (3) Successful transaction -> Show confirmation or thank you message
 
-              if (errorDetail?.issue === "INSTRUMENT_DECLINED") {
-                // (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-                // recoverable state, per https://developer.paypal.com/docs/checkout/standard/customize/handle-funding-failures/
-                return actions.restart();
-              } else if (errorDetail) {
-                // (2) Other non-recoverable errors -> Show a failure message
-                throw new Error(
-                  `${errorDetail.description} (${orderData.debug_id})`
-                );
-              } else {
-                // (3) Successful transaction -> Show confirmation or thank you message
-                // Or go to another URL:  actions.redirect('thank_you.html');
-                const transaction =
-                  orderData.purchase_units[0].payments.captures[0];
-                setMessage(
-                  `Transaction ${transaction.status}: ${transaction.id}. See console for all available details`
-                );
-                if (transaction.status == "COMPLETED") {
-                  upDateServerDataBase(orderData);
+                  const errorDetail = orderData?.details?.[0];
+
+                  if (errorDetail?.issue === "INSTRUMENT_DECLINED") {
+                    // (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+                    // recoverable state, per https://developer.paypal.com/docs/checkout/standard/customize/handle-funding-failures/
+                    return actions.restart();
+                  } else if (errorDetail) {
+                    // (2) Other non-recoverable errors -> Show a failure message
+                    throw new Error(
+                      `${errorDetail.description} (${orderData.debug_id})`,
+                    );
+                  } else {
+                    // (3) Successful transaction -> Show confirmation or thank you message
+                    // Or go to another URL:  actions.redirect('thank_you.html');
+                    const transaction =
+                      orderData.purchase_units[0].payments.captures[0];
+                    setMessage(
+                      `Transaction ${transaction.status}: ${transaction.id}. See console for all available details`,
+                    );
+                    if (transaction.status == "COMPLETED") {
+                      upDateServerDataBase(orderData);
+                    }
+                    console.log(
+                      "Capture result",
+                      orderData,
+                      JSON.stringify(orderData, null, 2),
+                    );
+                    navigate("/my-appointments");
+                  }
+                } catch (error) {
+                  console.error(error);
+                  setMessage(
+                    `Sorry, your transaction could not be processed...${error}`,
+                  );
                 }
-                console.log(
-                  "Capture result",
-                  orderData,
-                  JSON.stringify(orderData, null, 2)
-                );
-                navigate('/my-appointments')
-              }
-            } catch (error) {
-              console.error(error);
-              setMessage(
-                `Sorry, your transaction could not be processed...${error}`
-              );
-            }
-          }}
-        />
-      </PayPalScriptProvider>
-      <Message content={message} />
-    </div>
+              }}
+            />
+          </PayPalScriptProvider>
+          <Message content={message} />
+        </div>
       </div>
     )
   );
 }
 
 export default PayMent;
-
