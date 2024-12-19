@@ -9,6 +9,9 @@ Registration and Login: Secure user registration and login system, with role-bas
 Appointment Booking:
 Doctor Availability: Patients can view doctors' availability and book appointments directly through the platform. Appointment Management: Users can schedule, reschedule, or cancel appointments, and receive notifications about their bookings.
 
+Location-Based Services:
+Health Center Locator: Integration with Google Maps API to help users find and view nearby health centers based on their current location or a specified area.
+
 Doctor Management:
 Specialization and Availability: Doctors can manage their availability, specializations, and appointment slots, ensuring patients have up-to-date information when booking. Consultation Services: The platform allows for virtual consultations through a secure communication channel.
 
