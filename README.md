@@ -22,3 +22,16 @@ Security and Compliance:
 Data Security: Implementation of HTTPS, JWT-based authentication, and data encryption to protect user information. Compliance: Adherence to healthcare standards and regulations, ensuring that user data is handled with the utmost confidentiality.
 
 paypal payment option for the appointment
+
+### HOW TO RUN
+## backend
+# Create .env or rename the .env.example file.
+fill in all the required variables, paypal variables are not a must for the project to run.
+
+## frontend
+# Create .env file and create a variable called VITE_BACKEND_URL='' 
+ You may add googles map api keys. not a must.
+# Edite the vite.config.js file incase the import.meta.env.VITE_BACKEND_URL is not working to the server
+
+## admin
+# Create .env file and create a variable called VITE_BACKEND_URL='' 
